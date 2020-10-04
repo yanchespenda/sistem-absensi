@@ -4,25 +4,34 @@ import {
   BrowserRouter,
   Switch,
   Route,
+  Link,
 } from "react-router-dom"
 import history from "./history"
 import axios from "axios"
 import clsx from 'clsx'
 import { getStorageItem } from './helper/localStorage'
-import { SidenavList } from './interfaces'
+import { SidenavList, UserMenu } from './interfaces'
 
-import { makeStyles, Theme, createStyles, useTheme, AppBar, Toolbar, IconButton, Typography, Drawer, Divider, List, ListItem, ListItemIcon, ListItemText, LinearProgress, ListSubheader } from '@material-ui/core'
+import { makeStyles, Theme, createStyles, useTheme, AppBar, Toolbar, IconButton, Typography, Drawer, Divider, List, ListItem, ListItemIcon, ListItemText, LinearProgress, ListSubheader, CircularProgress } from '@material-ui/core'
 
 import MenuIcon from '@material-ui/icons/Menu'
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
-import AccountCircleIcon from '@material-ui/icons/AccountCircle'
 
 import LoginComponent from "./components/login"
 import OtherVerifyComponent from './components/other/verify'
 import SidenavIconComponent from './components/other/sidenavIcon'
+import OtherToolbarMenuComponent from './components/other/toolbarMenu'
 
 const DashboardComponent = React.lazy(() => import('./components/dashboard'))
+
+/* Admin */
+const AdminUserComponent = React.lazy(() => import('./components/admin/user'))
+const AdminAttedanceComponent = React.lazy(() => import('./components/admin/attedance'))
+
+/* Staff */
+
+/* Karyawan */
 
 axios.defaults.baseURL = 'http://127.0.0.1:3333'
 
@@ -68,9 +77,13 @@ const useStyles = makeStyles((theme: Theme) =>
       ...theme.mixins.toolbar,
       justifyContent: 'flex-end',
     },
+    drawerLoading: {
+      height: '128px'
+    },
     content: {
       flexGrow: 1,
-      padding: theme.spacing(3),
+      paddingLeft: theme.spacing(1),
+      paddingRight: theme.spacing(1),
       transition: theme.transitions.create('margin', {
         easing: theme.transitions.easing.sharp,
         duration: theme.transitions.duration.leavingScreen,
@@ -87,7 +100,7 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 )
 
-function App(props: any) {
+function App(_props: any) {
   const classes = useStyles()
   const theme = useTheme()
 
@@ -96,7 +109,8 @@ function App(props: any) {
   const [isSidenavLoading, setIsSidenavLoading] = useState(false)
   const [isLoadingAccount, setIsLoadingAccount] = useState(false)
   const [sidenavList, setSidenavList] = useState<SidenavList[]>([])
-  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [userMenu, setUserMenu] = useState<UserMenu>({avatar: undefined, menu: []})
+  const [drawerOpen, setDrawerOpen] = useState(true)
   const [headerTitle, setHeaderTitle] = useState('')
 
   const getAuthToken = getStorageItem('token')
@@ -107,12 +121,23 @@ function App(props: any) {
   const getSidenav = () => {
     setIsSidenavLoading(true)
     axios.get('api/user/sidenav').then( res => {
-      console.log('sidenav', res)
       setSidenavList(res.data)
     }).catch( () => {
       
     }).then(() => {
       setIsSidenavLoading(false)
+    })
+  }
+
+  const getUserMenu = () => {
+    setIsLoadingAccount(true)
+    axios.get('api/user/me').then( res => {
+      // console.log('getUserMenu', res)
+      setUserMenu(res.data)
+    }).catch( () => {
+      
+    }).then(() => {
+      setIsLoadingAccount(false)
     })
   }
 
@@ -123,6 +148,7 @@ function App(props: any) {
         setIsLogged(true)
 
         getSidenav()
+        getUserMenu()
       }).catch( () => {
         setIsLogged(false)
       }).then(() => {
@@ -145,96 +171,117 @@ function App(props: any) {
     setHeaderTitle(title)
   }
 
+  const getAppBar = () => {
+    return (
+      <AppBar
+        position="fixed"
+        className={clsx(classes.appBar, {
+          [classes.appBarShift]: drawerOpen,
+        })}
+      >
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            onClick={ handleDrawerOpen }
+            edge="start"
+            className={ clsx(classes.menuButton, drawerOpen && classes.hide) }
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" noWrap>
+            { headerTitle }
+          </Typography>
+          <div className="flex"></div>
+          <OtherToolbarMenuComponent data={ userMenu } />
+        </Toolbar>
+      </AppBar>
+    )
+  }
+
+  const getDrawer = () => {
+    return (
+      <Drawer
+        className={ classes.drawer }
+        variant="persistent"
+        anchor="left"
+        open={ drawerOpen }
+        classes={{
+          paper: classes.drawerPaper,
+        }}
+      >
+        <div className={classes.drawerHeader}>
+          <IconButton onClick={handleDrawerClose}>
+            {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+          </IconButton>
+        </div>
+        <Divider />
+        {
+          isSidenavLoading ? (
+            <div className={[classes.drawerLoading, 'layout-row layout-align-center-center'].join(' ')}>
+              <CircularProgress color={'secondary'} size="3rem" />
+            </div>
+          ) : ''
+        }
+        {
+          sidenavList.map((item, idx) => {
+            const getChildrenCount = item.children?.length || 0
+            const getChildren = item.children || []
+
+            return (
+              <Fragment key={ idx }>
+                {
+                  getChildrenCount > 0 ? (
+                    <List
+                      subheader={
+                        <ListSubheader>
+                          { item.title }
+                        </ListSubheader>
+                      }
+                    >
+                      {
+                        getChildren.map((itemChild, idxChild) => {
+                          return (
+                            <Link to={itemChild.url} key={idxChild}>
+                              <ListItem>
+                                {
+                                  itemChild.icon.enable ? <ListItemIcon><SidenavIconComponent icon={ itemChild.icon.name } /></ListItemIcon> : ''
+                                }
+                                <ListItemText primary={ itemChild.title } />
+                              </ListItem>
+                            </Link>
+                          )
+                        })
+                      }
+                    </List>
+                  ) : (
+                    <List>
+                      <Link to={item.url}>
+                        <ListItem>
+                          {
+                            item.icon?.enable ? <ListItemIcon><SidenavIconComponent icon={ item.icon.name } /></ListItemIcon> : ''
+                          }
+                          <ListItemText primary={ item.title } />
+                        </ListItem>
+                      </Link>
+                    </List>
+                  )
+                }
+              </Fragment>
+            )
+          })
+        }
+      </Drawer>
+    )
+  }
+
   const getInitComponent = () => {
     return (
       <Fragment>
         <div className="layout-column">
           <div className={classes.root}>
-            <AppBar
-              position="fixed"
-              className={clsx(classes.appBar, {
-                [classes.appBarShift]: drawerOpen,
-              })}
-            >
-              <Toolbar>
-                <IconButton
-                  color="inherit"
-                  aria-label="open drawer"
-                  onClick={ handleDrawerOpen }
-                  edge="start"
-                  className={ clsx(classes.menuButton, drawerOpen && classes.hide) }
-                >
-                  <MenuIcon />
-                </IconButton>
-                <Typography variant="h6" noWrap>
-                  { headerTitle }
-                </Typography>
-                <div className="flex"></div>
-                <IconButton aria-label="delete">
-                  <AccountCircleIcon />
-                </IconButton>
-              </Toolbar>
-            </AppBar>
-            <Drawer
-              className={ classes.drawer }
-              variant="persistent"
-              anchor="left"
-              open={ drawerOpen }
-              classes={{
-                paper: classes.drawerPaper,
-              }}
-            >
-              <div className={classes.drawerHeader}>
-                <IconButton onClick={handleDrawerClose}>
-                  {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-                </IconButton>
-              </div>
-              <Divider />
-              {
-                sidenavList.map((item, idx) => {
-                  const getChildrenCount = item.children?.length || 0
-                  const getChildren = item.children || []
-
-                  return (
-                    <Fragment key={ idx }>
-                      {
-                        getChildrenCount > 0 ? (
-                          <List
-                            subheader={
-                              <ListSubheader>
-                                { item.title }
-                              </ListSubheader>
-                            }
-                          >
-                            {
-                              getChildren.map((itemChild, idxChild) => {
-                                return (
-                                  <ListItem key={idxChild}>
-                                    {
-                                      itemChild.icon.enable ? <ListItemIcon><SidenavIconComponent icon={ itemChild.icon.name } /></ListItemIcon> : ''
-                                    }
-                                    <ListItemText primary={ itemChild.title } />
-                                  </ListItem>
-                                )
-                              })
-                            }
-                          </List>
-                        ) : (
-                          <List>
-                            <ListItem>
-                              {
-                                item.icon?.enable ? <ListItemIcon><SidenavIconComponent icon={ item.icon.name } /></ListItemIcon> : ''
-                              }
-                              <ListItemText primary={ item.title } />
-                            </ListItem>
-                          </List>
-                        )
-                      }
-                    </Fragment>
-                  )
-                })
-              }
-            </Drawer>
+            { getAppBar() }
+            { getDrawer() }
             <main
               className={clsx(classes.content, {
                 [classes.contentShift]: drawerOpen,
@@ -246,6 +293,14 @@ function App(props: any) {
                   <Route exact path="/">
                     <DashboardComponent titleHandler={ headerTitleHandle } />
                   </Route>
+
+                  <Route exact path={['/account/avatar', '/account/setting']} component={(props: any) => <DashboardComponent {...props} titleHandler={ headerTitleHandle } />} ></Route>
+
+                  {/* Admin */} 
+                  <Route exact path={['/admin/users']} component={(props: any) => <AdminUserComponent {...props} titleHandler={ headerTitleHandle } />} ></Route>
+                  <Route exact path={['/admin/attendance']} component={(props: any) => <AdminAttedanceComponent {...props} titleHandler={ headerTitleHandle } />} ></Route>
+
+
                 </Switch>
               </Suspense>
               

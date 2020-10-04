@@ -48,15 +48,20 @@ const theme = createMuiTheme({
 		MuiInputLabel: {
 			root: {
 				'&$focused': {
-					color: '#fff'
+					color: 'rgb(250,250,250)'
 				}
 			},
 		},
 		MuiOutlinedInput: {
 			root: {
 				'&$focused $notchedOutline': {
-					borderColor: '#fff',
+					borderColor: 'rgb(250,250,250)',
 				}
+			}
+		},
+		MuiButton: {
+			label: {
+				color: 'rgb(250,250,250)'
 			}
 		}
 	}

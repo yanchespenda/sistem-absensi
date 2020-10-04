@@ -13,3 +13,13 @@ export function setStorageItem(key: string, value: string) {
     }
     return false
 }
+
+export function deleteStorageItem(key: string) {
+    try {
+        localStorage.removeItem(key)
+        return true
+    } catch (error) {
+        
+    }
+    return false
+}

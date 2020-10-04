@@ -49,7 +49,7 @@ function LoginComponent() {
                     const token = `${res.data.token}`
                     setStorageItem('token', token)
                     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-                    console.log('response', res)
+                    // console.log('response', res)
 
                     resetForm({})
                     window.location.reload()

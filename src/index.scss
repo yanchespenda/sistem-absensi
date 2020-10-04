@@ -45,4 +45,27 @@ body {
 
 }
 
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.container {
+  margin: 0 auto;
+  max-width: 1280px;
+  width: 100%;
+
+  @media only screen and (min-width: 601px) {
+      width: 85%;
+  }
+
+  @media only screen and (min-width: 993px) {
+      width: 70%;
+  }
+}
+
+.sectionContainer {
+  margin-top: 64px;
+}
+
 

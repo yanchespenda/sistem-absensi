@@ -1,24 +1,16 @@
 import React, { Fragment } from 'react'
 
-import DashboardIcon from '@material-ui/icons/Dashboard'
-import AccountBoxIcon from '@material-ui/icons/AccountBox'
 import PeopleIcon from '@material-ui/icons/People'
 import SettingsIcon from '@material-ui/icons/Settings'
 import FaceIcon from '@material-ui/icons/Face'
-// import DashboardIcon from '@material-ui/icons/Dashboard'
-// import DashboardIcon from '@material-ui/icons/Dashboard'
 
 interface IProps {
     icon: string
 }
-function SidenavIconComponent({ icon }: IProps) {
+function MenuIconComponent({ icon }: IProps) {
 
     const convertStrToIcon = (icon: string) => {
-        if (icon === 'DashboardIcon') {
-            return <DashboardIcon />
-        } else if (icon === 'AccountBoxIcon') {
-            return <AccountBoxIcon />
-        } else if (icon === 'PeopleIcon') {
+        if (icon === 'PeopleIcon') {
             return <PeopleIcon />
         } else if (icon === 'SettingsIcon') {
             return <SettingsIcon />
@@ -31,4 +23,4 @@ function SidenavIconComponent({ icon }: IProps) {
     return convertStrToIcon(icon)
 }
 
-export default SidenavIconComponent
+export default MenuIconComponent

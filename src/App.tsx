@@ -108,7 +108,7 @@ function App(_props: any) {
   const [isLogged, setIsLogged] = useState(false)
   const [isVerifyLoading, setIsVerifyLoading] = useState(false)
   const [isSidenavLoading, setIsSidenavLoading] = useState(false)
-  const [isLoadingAccount, setIsLoadingAccount] = useState(false)
+  // const [isLoadingAccount, setIsLoadingAccount] = useState(false)
   const [sidenavList, setSidenavList] = useState<SidenavList[]>([])
   const [userMenu, setUserMenu] = useState<UserMenu>({avatar: undefined, menu: []})
   const [drawerOpen, setDrawerOpen] = useState(true)
@@ -131,14 +131,14 @@ function App(_props: any) {
   }
 
   const getUserMenu = () => {
-    setIsLoadingAccount(true)
+    // setIsLoadingAccount(true)
     axios.get('api/user/me').then( res => {
       // console.log('getUserMenu', res)
       setUserMenu(res.data)
     }).catch( () => {
       
     }).then(() => {
-      setIsLoadingAccount(false)
+      // setIsLoadingAccount(false)
     })
   }
 

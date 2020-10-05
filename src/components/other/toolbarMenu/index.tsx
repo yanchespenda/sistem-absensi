@@ -107,7 +107,7 @@ function OtherToolbarMenuComponent({ data }: IProps) {
                                     disableRipple
                                 >
                                     <div className={classes.avatarImg}>
-                                        <img src={getAvatar} className={classes.avatar} />
+                                        <img src={getAvatar} className={classes.avatar} alt="avatar" />
                                     </div>
                                 </IconButton>
                             </Fragment>

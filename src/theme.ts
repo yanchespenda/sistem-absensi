@@ -63,7 +63,14 @@ const theme = createMuiTheme({
 			label: {
 				color: 'rgb(250,250,250)'
 			}
-		}
+		},
+		MuiSnackbarContent: {
+			root: {
+				backgroundColor: '#212121',
+				color: 'rgb(250,250,250)'
+			}
+		},
+		
 	}
 })
 

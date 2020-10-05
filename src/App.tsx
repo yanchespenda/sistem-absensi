@@ -32,6 +32,7 @@ const AdminAttedanceComponent = React.lazy(() => import('./components/admin/atte
 /* Staff */
 
 /* Karyawan */
+const KaryawanAttendanceComponent = React.lazy(() => import('./components/karyawan/attendance'))
 
 axios.defaults.baseURL = 'http://127.0.0.1:3333'
 
@@ -300,7 +301,9 @@ function App(_props: any) {
                   <Route exact path={['/admin/users']} component={(props: any) => <AdminUserComponent {...props} titleHandler={ headerTitleHandle } />} ></Route>
                   <Route exact path={['/admin/attendance']} component={(props: any) => <AdminAttedanceComponent {...props} titleHandler={ headerTitleHandle } />} ></Route>
 
-
+                  {/* Staff */}
+                  {/* Karyawan */}
+                  <Route exact path={['/attendance']} component={(props: any) => <KaryawanAttendanceComponent {...props} titleHandler={ headerTitleHandle } />} ></Route>
                 </Switch>
               </Suspense>
               

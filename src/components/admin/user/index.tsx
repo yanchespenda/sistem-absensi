@@ -3,8 +3,13 @@ import axios from "axios"
 import useSWR from "swr"
 import { Formik, Form, Field, FormikProps } from 'formik'
 import * as yup from "yup"
-import { Paper, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, makeStyles, Theme, createStyles, TablePagination, Toolbar, IconButton, Typography, LinearProgress, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Button, CircularProgress } from "@material-ui/core"
+import { Paper, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, makeStyles, Theme, createStyles, TablePagination, Toolbar, IconButton, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Button, CircularProgress, Switch, FormControlLabel, InputAdornment } from "@material-ui/core"
+import { TextField } from 'formik-material-ui'
 import AddIcon from '@material-ui/icons/Add'
+import VisibilityIcon from '@material-ui/icons/Visibility'
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff'
+import SnackbarMessage from "../../other/parts/snackbarMessage"
+import { TimeLocal } from "../../../helper/dateTime"
 // import DeleteIcon from '@material-ui/icons/Delete'
 // import RefreshIcon from '@material-ui/icons/Refresh'
 // import EditIcon from '@material-ui/icons/Edit'
@@ -14,11 +19,12 @@ interface tableData {
     id: number
     username: string
     lastAttendAt: string | null
+    lastLoggedAt: string | null
 }
 
-function createData(no: number, id: number, username: string, lastAttendAt: string | null): tableData {
-    return { no, id, username, lastAttendAt }
-}
+// function createData(no: number, id: number, username: string, lastAttendAt: string | null, lastLoggedAt: string | null): tableData {
+//     return { no, id, username, lastAttendAt, lastLoggedAt }
+// }
 
 interface IProps {
     titleHandler: (title: string) => void
@@ -44,7 +50,7 @@ interface UserDialogData {
 }
 interface InterfaceUserForm {
     username: string
-    password?: string
+    password: string
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -66,9 +72,9 @@ const useStyles = makeStyles((theme: Theme) =>
             width: '15%',
         },
         headRowCellUsername: {
-            width: '70%',
+            width: '55%',
         },
-        headRowCellLastAttended: {
+        headRowCellDateTime: {
             width: '15%',
         },
 
@@ -111,35 +117,68 @@ function AdminUserComponent({titleHandler}: IProps) {
     })
     const [userDialogId, setUserDialogId] = useState(0)
     const [userDialogAvatarLoading, setUserDialogAvatarLoading] = useState(false)
+    const [userDialogChangePassword, setUserDialogChangePassword] = useState(false)
+    const [userDialogPasswordShow, setUserDialogPasswordShow] = useState(false)
+    const [snackBarOpen, setSnackBarOpen] = useState(false)
+    const [snackBarMessage, setSnackBarMessage] = useState('')
+    const [dialogConfirm, setDialogConfirm] = useState(false)
+    const [dialogConfirmMessage, setDialogConfirmMessage] = useState('')
 
-    const { data } = useSWR<SWRData>(`api/admin/user?perPage=${rowsPerPage}&page=${page}`)
-
-    // if (data) {
-    //     console.log('data', data)
-    // }
+    const { data, revalidate } = useSWR<SWRData>(`api/admin/user?perPage=${rowsPerPage}&page=${page}`)
     
     useEffect(() => {
         titleHandler('User Management')
     }, [titleHandler])
 
     const handleDialogClose = () => {
-        setUserDialogOpen(false)
+        if (!userDialogLoading)
+            setUserDialogOpen(false)
     }
     const handleDialogOpen = (id: number) => {
         setUserDialogLoading(true)
         setUserDialogId(id)
         axios.get<UserDialogData>(`/api/admin/user/${id}/edit`).then(res => {
             setUserDialogData(res.data)
+            setUserDialogChangePassword(false)
+            setUserDialogPasswordShow(false)
             setUserDialogOpen(true)
         }).catch(err => {
+            setSnackBarOpen(true)
+            setSnackBarMessage('Something went wrong')
             console.log('err', err)
         }).then( () => {
             setUserDialogLoading(false)
         })
     }
-
     const handleDialogSave = (data: InterfaceUserForm, resetForm: Function, isLoading: Function) => {
+        setUserDialogLoading(true)
+        const formData = new FormData()
+        formData.append('username', data.username)
+        if (userDialogChangePassword && data.password.toString().length > 0) {
+            formData.append('password', data.password)
+        }
+        axios.post<UserDialogData>(`/api/admin/user/${userDialogId}/save`, formData).then(res => {
+            resetForm({})
+            setUserDialogOpen(false)
 
+            setSnackBarOpen(true)
+            setSnackBarMessage('User saved')
+        }).catch(err => {
+            setSnackBarOpen(true)
+            setSnackBarMessage('Something went wrong')
+            console.log('err', err)
+        }).then( () => {
+            isLoading(false)
+            setUserDialogLoading(false)
+        })
+    }
+
+    const handleSnackbarMessage = (event: React.SyntheticEvent | React.MouseEvent, reason?: string) => {
+        if (reason === 'clickaway') {
+          return
+        }
+    
+        setSnackBarOpen(false)
     }
 
     const handleChangePage = (_event: unknown, newPage: number) => {
@@ -160,11 +199,40 @@ function AdminUserComponent({titleHandler}: IProps) {
             formData.append('avatar', e[0])
             axios.post<UserDialogData>(`/api/admin/user/${userDialogId}/avatar`, formData).then(res => {
                 setUserDialogData(res.data)
+                setSnackBarOpen(true)
+                setSnackBarMessage('Avatar changed')
             }).catch(err => {
+                setSnackBarOpen(true)
+                setSnackBarMessage('Something went wrong')
                 console.log('err', err)
             }).then( () => {
                 setUserDialogAvatarLoading(false)
             })
+        }
+    }
+
+    const handleDeleteDialog = (id: number) => {
+        setDialogConfirm(true)
+        setUserDialogId(id)
+        setDialogConfirmMessage('Are you sure to delete this user?')
+    }
+
+    const handleDeleteConfirm = (confirm: boolean) => {
+        if (confirm) {
+            axios.delete(`/api/admin/user/${userDialogId}/delete`).then(res => {
+                setSnackBarOpen(true)
+                setSnackBarMessage(res.data.message)
+
+                revalidate()
+            }).catch(err => {
+                setSnackBarOpen(true)
+                setSnackBarMessage('Something went wrong')
+                console.log('err', err)
+            }).then( () => {
+                setDialogConfirm(false)
+            })
+        } else {
+            setDialogConfirm(false)
         }
     }
 
@@ -177,7 +245,6 @@ function AdminUserComponent({titleHandler}: IProps) {
                             <div className="flex"></div>
                             <IconButton
                                 edge="start"
-                                // className={classes.menuButton}
                                 color="inherit"
                                 aria-label="new data"
                             >
@@ -190,7 +257,8 @@ function AdminUserComponent({titleHandler}: IProps) {
                                     <TableRow>
                                         <TableCell className={classes.headRowCellNo}>No</TableCell>
                                         <TableCell className={classes.headRowCellUsername}>Username</TableCell>
-                                        <TableCell className={classes.headRowCellLastAttended} align="right">Last attended</TableCell>
+                                        <TableCell className={classes.headRowCellDateTime} align="right">Last attended</TableCell>
+                                        <TableCell className={classes.headRowCellDateTime} align="right">Last logged</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -204,15 +272,20 @@ function AdminUserComponent({titleHandler}: IProps) {
                                                     <div className="layout-column">
                                                         <span>{row.username}</span>
                                                         <div className="layout-row">
-                                                            <Typography variant="caption" component="span" onClick={() => handleDialogOpen(row.id)}>Edit</Typography>
+                                                            <Typography className="selecableContent" variant="caption" component="span" onClick={() => handleDialogOpen(row.id)}>Edit</Typography>
                                                             {'\u00A0|\u00A0'}
-                                                            <Typography variant="caption" component="span">Delete</Typography>
+                                                            <Typography className="selecableContent" variant="caption" component="span" onClick={() => handleDeleteDialog(row.id)}>Delete</Typography>
                                                         </div>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell align="right">
                                                     {
-                                                        row.lastAttendAt === null ? 'None' : row.lastAttendAt
+                                                        row.lastAttendAt === null ? 'None' : TimeLocal(row.lastAttendAt)
+                                                    }
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    {
+                                                        row.lastLoggedAt === null ? 'None' : TimeLocal(row.lastLoggedAt)
                                                     }
                                                 </TableCell>
                                             </TableRow>
@@ -221,15 +294,19 @@ function AdminUserComponent({titleHandler}: IProps) {
                                 </TableBody>
                             </Table>
                         </TableContainer>
-                        <TablePagination
-                            rowsPerPageOptions={[5, 10, 25]}
-                            component="div"
-                            count={data?.config.totalItems || 0}
-                            rowsPerPage={rowsPerPage}
-                            page={page}
-                            onChangePage={handleChangePage}
-                            onChangeRowsPerPage={handleChangeRowsPerPage}
-                        />
+                        {
+                            data ? (
+                                <TablePagination
+                                    rowsPerPageOptions={[5, 10, 25]}
+                                    component="div"
+                                    count={data?.config?.totalItems || 0}
+                                    rowsPerPage={rowsPerPage}
+                                    page={page}
+                                    onChangePage={handleChangePage}
+                                    onChangeRowsPerPage={handleChangeRowsPerPage}
+                                />
+                            ) : null
+                        }
                     </Paper>
                 </div>
             </div>
@@ -240,19 +317,23 @@ function AdminUserComponent({titleHandler}: IProps) {
                 <Formik 
                     initialValues={{
                         username: userDialogData.username,
+                        password: ''
                     }}
                     validationSchema={yup.object().shape({
                         username: yup.string()
                             .required('Username required'),
+                        password: !userDialogChangePassword ? yup.string().min(6, 'To short').max(25, 'To long') : yup.string().required('Password required').min(6, 'To short').max(25, 'To long')
                     })}
                     onSubmit={(values: InterfaceUserForm, { resetForm, setSubmitting}) => {
-                        // handleDialogSave(values, resetForm, setSubmitting)
+                        console.group('onSubmit')
+                        console.log('values', values)
+                        console.groupEnd()
+                        handleDialogSave(values, resetForm, setSubmitting)
                     }}
                 >
                     {
                         (props: FormikProps<InterfaceUserForm>) => {
                             const {
-                                values,
                                 touched,
                                 errors,
                                 handleBlur,
@@ -266,7 +347,7 @@ function AdminUserComponent({titleHandler}: IProps) {
                                     <DialogContent>
                                         <div className={['layout-column layout-align-center-center', classes.userDialogAvatarBox].join(' ')}>
                                             <div className={classes.userDialogAvatarContainer}>
-                                                <img src={userDialogData.avatar} className={classes.userDialogAvatar} />
+                                                <img src={userDialogData.avatar} className={classes.userDialogAvatar} alt="avatar edit" />
                                             </div>
                                             <input
                                                 accept="image/*"
@@ -274,22 +355,23 @@ function AdminUserComponent({titleHandler}: IProps) {
                                                 id="contained-button-file"
                                                 type="file"
                                                 onChange={ (e) => handleAvatarChange(e.target.files) }
+
+                                                disabled={ userDialogAvatarLoading || isSubmitting }
                                             />
                                             <label htmlFor="contained-button-file">
-                                                <Button variant="contained" color="primary" component="span" disabled={ userDialogAvatarLoading } size="small" startIcon={userDialogAvatarLoading ? <CircularProgress size="1rem" /> : null}>
+                                                <Button variant="contained" color="primary" component="span" disabled={ userDialogAvatarLoading || isSubmitting } size="small" startIcon={userDialogAvatarLoading ? <CircularProgress size="1rem" /> : null}>
                                                     Change Avatar
                                                 </Button>
                                             </label>
                                         </div>
                                         <Field
                                             component={ TextField }
-                                            name="Username"
+
+                                            name="username"
+                                            type="text"
                                             label="Username"
                                             variant="outlined"
                                             fullWidth
-                                            id="username"
-                                            value={values.username || ''}
-                                            type="text"
                                             helperText={
                                                 errors.username && touched.username
                                                     ? errors.username
@@ -304,6 +386,57 @@ function AdminUserComponent({titleHandler}: IProps) {
                                             onBlur={ handleBlur }
                                             disabled={ isSubmitting }
                                         />
+
+                                        <FormControlLabel
+                                            control={
+                                                <Switch
+                                                    checked={ userDialogChangePassword }
+                                                    onChange={ () => setUserDialogChangePassword(!userDialogChangePassword) }
+                                                    name="passwordChanger"
+                                                    inputProps={{ 'aria-label': 'Password changer switch' }}
+                                                />
+                                            }
+                                            disabled={ isSubmitting }
+                                            label="Change password?"
+                                        />
+                                        {
+                                            userDialogChangePassword ? (
+                                                <Field
+                                                    component={ TextField }
+                                                    name="password"
+                                                    label="Password"
+                                                    variant="outlined"
+                                                    fullWidth
+                                                    type={ userDialogPasswordShow ? 'text' : 'password'}
+                                                    helperText={
+                                                        errors.password && touched.password
+                                                            ? errors.password
+                                                            : 'Enter password.'
+                                                    }
+                                                    error={
+                                                        errors.password && touched.password
+                                                            ? true
+                                                            : false
+                                                    }
+                                                    onChange={ handleChange }
+                                                    onBlur={ handleBlur }
+                                                    disabled={ isSubmitting }
+
+                                                    InputProps={{
+                                                        endAdornment: (
+                                                            <InputAdornment position="end">
+                                                                <IconButton
+                                                                    aria-label="toggle password visibility"
+                                                                    onClick={() => setUserDialogPasswordShow(!userDialogPasswordShow)}
+                                                                >
+                                                                    {userDialogPasswordShow ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                                                                </IconButton>
+                                                            </InputAdornment>
+                                                        ),
+                                                    }}
+                                                />
+                                            ) : null
+                                        }
                                     </DialogContent>
                                     
                                     <DialogActions>
@@ -318,7 +451,6 @@ function AdminUserComponent({titleHandler}: IProps) {
                                                 type="submit"
                                                 disabled={ isSubmitting }
                                                 onClick={ submitForm }
-                                                
                                             >
                                                 Save
                                             </Button>
@@ -331,6 +463,28 @@ function AdminUserComponent({titleHandler}: IProps) {
                     }
                 </Formik>
             </Dialog>
+        
+            {/* Dialog Confirm */}
+            {/* <DialogConfirmComponent open={dialogConfirm} confirmMessage={dialogConfirmMessage} closeCallback={dialogConfirmCallback} /> */}
+            <Dialog
+                open={dialogConfirm}
+                onClose={() => handleDeleteConfirm(false)}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">{dialogConfirmMessage}</DialogTitle>
+                <DialogActions>
+                    <Button onClick={() => handleDeleteConfirm(false)} color="primary">
+                        No
+                    </Button>
+                    <Button onClick={() => handleDeleteConfirm(true)} color="primary" autoFocus>
+                        Yes
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Snackbar Message */}
+            <SnackbarMessage open={snackBarOpen} message={snackBarMessage} handleClose={handleSnackbarMessage} />
         </Fragment>
     )
 }

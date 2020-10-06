@@ -11,6 +11,7 @@ import axios from "axios"
 import clsx from 'clsx'
 import { getStorageItem } from './helper/localStorage'
 import { SidenavList, UserMenu } from './interfaces'
+import useMediaQuery from '@material-ui/core/useMediaQuery'
 
 import { makeStyles, Theme, createStyles, useTheme, AppBar, Toolbar, IconButton, Typography, Drawer, Divider, List, ListItem, ListItemIcon, ListItemText, LinearProgress, ListSubheader, CircularProgress } from '@material-ui/core'
 
@@ -105,13 +106,15 @@ function App(_props: any) {
   const classes = useStyles()
   const theme = useTheme()
 
+  const isExpand = useMediaQuery('(min-width:901px)')
+
   const [isLogged, setIsLogged] = useState(false)
   const [isVerifyLoading, setIsVerifyLoading] = useState(false)
   const [isSidenavLoading, setIsSidenavLoading] = useState(false)
   // const [isLoadingAccount, setIsLoadingAccount] = useState(false)
   const [sidenavList, setSidenavList] = useState<SidenavList[]>([])
   const [userMenu, setUserMenu] = useState<UserMenu>({avatar: undefined, menu: []})
-  const [drawerOpen, setDrawerOpen] = useState(true)
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const [headerTitle, setHeaderTitle] = useState('')
 
   const getAuthToken = getStorageItem('token')
@@ -159,6 +162,11 @@ function App(_props: any) {
     
     verifyToken()
   }, [])
+
+  useEffect(() => {
+    // console.log('isExpand', isExpand)
+    setDrawerOpen(isExpand)
+  }, [isExpand])
 
   const handleDrawerOpen = () => {
     setDrawerOpen(true);

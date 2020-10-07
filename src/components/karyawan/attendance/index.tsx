@@ -111,10 +111,10 @@ const KaryawanAttendanceComponent = ({titleHandler}: IProps) => {
         }
     }
     
-    const handleReset = () => {
-        checkAttedanceIn()
-        setAttedanceInActiveStep(0)
-    }
+    // const handleReset = () => {
+    //     checkAttedanceIn()
+    //     setAttedanceInActiveStep(0)
+    // }
 
     const handleAttedanceIn = () => {
         const params = new URLSearchParams()
@@ -224,7 +224,7 @@ const KaryawanAttendanceComponent = ({titleHandler}: IProps) => {
                 return (
                     <div className="layout-column">
                         {
-                            attedancePhoto ? (<img src={attedancePhoto} />) : null
+                            attedancePhoto ? (<img src={attedancePhoto} alt="current face" />) : null
                         }
                         <Typography className={classes.steper2Info}>
                             Attedance time: { `${attedanceCheck.onNow ? TimeLocal(attedanceCheck.onNow) : ''}${attedanceCheck.isEarly ? ' [to early]' : ''}${attedanceCheck.isLate ? ' [to late]' : ''}` }

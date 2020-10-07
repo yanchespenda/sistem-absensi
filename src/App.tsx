@@ -9,7 +9,7 @@ import {
 import history from "./history"
 import axios from "axios"
 import clsx from 'clsx'
-import { getStorageItem } from './helper/localStorage'
+import { getStorageItem, deleteStorageItem } from './helper/localStorage'
 import { SidenavList, UserMenu } from './interfaces'
 import useMediaQuery from '@material-ui/core/useMediaQuery'
 
@@ -35,7 +35,8 @@ const AdminAttedanceComponent = React.lazy(() => import('./components/admin/atte
 /* Karyawan */
 const KaryawanAttendanceComponent = React.lazy(() => import('./components/karyawan/attendance'))
 
-axios.defaults.baseURL = 'http://127.0.0.1:3333'
+// axios.defaults.baseURL = 'http://127.0.0.1:3333' 
+axios.defaults.baseURL = 'https://api.absensi.project.arproject.web.id'
 
 const drawerWidth = 240;
 
@@ -153,7 +154,11 @@ function App(_props: any) {
 
         getSidenav()
         getUserMenu()
-      }).catch( () => {
+      }).catch( (err) => {
+        if (err.response.status === 401) {
+          deleteStorageItem('token')
+          delete axios.defaults.headers.common['Authorization']
+        }
         setIsLogged(false)
       }).then(() => {
         setIsVerifyLoading(false)

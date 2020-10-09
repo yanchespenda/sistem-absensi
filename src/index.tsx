@@ -28,7 +28,7 @@ ReactDOM.render(
       value={{ 
         fetcher: (url: string) => axios(url).then((r) => r.data),
         onError: error => {
-          if (error.response.status === 401) {
+          if (error.response?.status === 401) {
             window.location.reload()
           }
           if (error.status !== 403 && error.status !== 404) {

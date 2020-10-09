@@ -1,13 +1,15 @@
 import React, { Fragment, useEffect, useState } from "react"
-import { Card, Fab, makeStyles, Theme, createStyles, CardContent, Typography, CardActions, Button, Stepper, Step, StepLabel, StepContent, Paper } from "@material-ui/core"
-import Webcam from "../../../helper/react-webcam"
+import { Card, Fab, makeStyles, Theme, createStyles, CardContent, Typography, CardActions, Button, Stepper, Step, StepLabel, StepContent, Paper, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, IconButton } from "@material-ui/core"
+import Webcam from "react-webcam"
 import axios from "axios"
 
+import CloseIcon from '@material-ui/icons/Close'
 import CameraIcon from '@material-ui/icons/Camera'
 
 import MainStyle from './style.module.scss'
 import useSWR from "swr"
 import { TimeLocal } from "../../../helper/dateTime"
+import OtherVerifyComponent from "../../other/verify"
 
 interface IProps {
     titleHandler: (title: string) => void
@@ -65,6 +67,42 @@ const useStyles = makeStyles((theme: Theme) =>
         },
         steper2Info: {
             marginTop: theme.spacing(1),
+        },
+
+        // background: rgba(0,0,0,.5);right: 0;bottom: 0;left: 0;z-index: 1;cursor: crosshair;
+        camOverlay: {
+            background: 'rgba(0,0,0,.5)',
+            right: 0,
+            bottom: 0,
+            left: 0,
+            zIndex: 1,
+            cursor: 'crosshair',
+            position: 'absolute',
+            top: 0,
+            userSelect: 'none',
+            boxSizing: 'border-box',
+            MozUserSelect: 'none',
+            msUserSelect: 'none',
+            WebkitBoxSizing: 'border-box',
+            MozBoxSizing: 'border-box',
+            marginBottom: '8px'
+        },
+        camRegion: {
+            position: 'absolute',
+            top: 0,
+            userSelect: 'none',
+            boxSizing: 'border-box',
+            MozUserSelect: 'none',
+            msUserSelect: 'none',
+            WebkitBoxSizing: 'border-box',
+            MozBoxSizing: 'border-box',
+            marginBottom: '8px',
+            border: '1px dashed red',
+            zIndex: 3,
+            cursor: 'move',
+            transform: 'translate(0px, 0px)',
+            width: '450px',
+            height: '450px',
         }
     }),
 )
@@ -72,7 +110,6 @@ const useStyles = makeStyles((theme: Theme) =>
 const KaryawanAttendanceComponent = ({titleHandler}: IProps) => {
     const classes = useStyles()
     const webcamRef = React.useRef<any>(null)
-    // const [initLoading, setInitLoading] = useState(false)
     const [attedanceIn, setAttedanceIn] = useState(false)
     const [attedanceOut, setAttedanceOut] = useState(false)
     const [attedanceInActiveStep, setAttedanceInActiveStep] = useState(0)
@@ -86,16 +123,22 @@ const KaryawanAttendanceComponent = ({titleHandler}: IProps) => {
         infoMin: null,
         onNow: null
     })
-    const [attedancePhoto, setAttedancePhoto] = useState<string | null>(null)
+    const [attedanceLoading, setAttedanceLoading] = useState(false)
+    const [attedancePhoto, setAttedancePhoto] = useState<any>(null)
+    const [openDialogConfirm, setOpenDialogConfirm] = useState(false)
+    const [dialogMessage, setDialogMessage] = useState('')
+    const [openSnackbar, setOpenSnackbar] = useState(false)
+    const [snackBarMessage, setSnackBarMessage] = useState('')
 
     const handleNext = () => {
         const prevStep = attedanceInActiveStep
+        if (prevStep === 2 ) {
+            handleAttedanceIn()
+            return ''
+        }
         setAttedanceInActiveStep((prevActiveStep) => prevActiveStep + 1)
         if (prevStep === 0 ) {
             setAttedanceSteperNextDisabled(true)
-        }
-        if (prevStep === 2 ) {
-            handleAttedanceIn()
         }
     }
     
@@ -116,17 +159,57 @@ const KaryawanAttendanceComponent = ({titleHandler}: IProps) => {
     //     setAttedanceInActiveStep(0)
     // }
 
-    const handleAttedanceIn = () => {
+    const handleAttedanceIn = (cofirm?: boolean) => {
+        if (!cofirm) {
+            setDialogMessage('Are you sure to attended in?')
+            setOpenDialogConfirm(true)
+            return 
+        }
+
+        setAttedanceLoading(true)
         const params = new URLSearchParams()
         if (attedancePhoto)
             params.append('face', attedancePhoto)
         // params.append('password', data.password)
         axios.post('api/karyawan/attedance/in', params).then(res => {
-            console.log('res', res)
-        }).catch(err => {
-            console.log('err', err)
-        }).then(() => {
+            setOpenSnackbar(true)
+            setSnackBarMessage(res.data?.message || 'Ok')
+            // console.log('res', res)
+            
+            // setAttedanceInActiveStep((prevActiveStep) => prevActiveStep + 1)
             setAttedanceIn(false)
+        }).catch(err => {
+            setOpenSnackbar(true)
+            setSnackBarMessage(err.response?.data?.message || 'Something went wrong')
+            // console.log('err', err)
+        }).then(() => {
+            revalidate()
+            setOpenDialogConfirm(false)
+            setAttedanceLoading(false)
+        })
+    }
+
+    const handleAttedanceOut = (cofirm?: boolean) => {
+        if (!cofirm) {
+            setDialogMessage('Are you sure to attended out?')
+            setOpenDialogConfirm(true)
+            return 
+        }
+
+        setAttedanceLoading(true)
+        axios.post('api/karyawan/attedance/out').then(res => {
+            setOpenSnackbar(true)
+            setSnackBarMessage(res.data?.message || 'Ok')
+            // console.log('res', res)
+        }).catch(err => {
+            setOpenSnackbar(true)
+            setSnackBarMessage(err.response?.data?.message || 'Something went wrong')
+            // console.log('err', err)
+        }).then(() => {
+            revalidate()
+            setOpenDialogConfirm(false)
+            setAttedanceOut(false)
+            setAttedanceLoading(false)
         })
     }
 
@@ -144,10 +227,10 @@ const KaryawanAttendanceComponent = ({titleHandler}: IProps) => {
           setAttedancePhoto(imageSrc)
           setAttedanceSteperNextDisabled(false)
         },
-        [webcamRef]
+        [webcamRef, setAttedancePhoto]
     )
 
-    const { data } = useSWR<SWRData>('/api/karyawan/status')
+    const { data, revalidate } = useSWR<SWRData>('/api/karyawan/status')
 
     const getSteper = () => ['Info attedance', 'Take a photo', 'Check & submit']
 
@@ -155,7 +238,7 @@ const KaryawanAttendanceComponent = ({titleHandler}: IProps) => {
         setAttedanceSteperLoading(true)
         axios.get<AttedanceCheck>('/api/karyawan/attedance/in/check').then(res => {
             setAttedanceCheck(res.data)
-            console.log('res', res)
+            // console.log('res', res)
         }).catch(err => {
             console.log('err', err)
         }).then(() => {
@@ -171,6 +254,9 @@ const KaryawanAttendanceComponent = ({titleHandler}: IProps) => {
     }
 
     const attedanceOutRun = () => {
+        if (!attedanceOut) {
+            handleAttedanceOut()
+        }
         setAttedanceOut(!attedanceOut)
     }
 
@@ -199,9 +285,12 @@ const KaryawanAttendanceComponent = ({titleHandler}: IProps) => {
                         <Webcam
                             audio={false}
                             ref={webcamRef}
-                            screenshotFormat="image/webp"
+                            screenshotFormat="image/jpeg"
                             videoConstraints={videoConstraints}
                         />
+
+                        {/* <div className={classes.camRegion}></div> */}
+                        {/* <div className={classes.camOverlay}></div> */}
 
                         <div className={[MainStyle.actionContainer, 'layout-row layout-align-center-center'].join(' ')}>
                             <div className={MainStyle.action}>
@@ -234,6 +323,19 @@ const KaryawanAttendanceComponent = ({titleHandler}: IProps) => {
             default:
                 return 'Unknown step'
         }
+    }
+
+    const handleDialogClose = () => {
+        if (attedanceIn) {
+            handleAttedanceIn(true)
+        }
+        if (attedanceOut) {
+            handleAttedanceOut(true)
+        }
+    }
+
+    const snackbarHandle = () => {
+        setOpenSnackbar(false)
     }
 
     useEffect(() => {
@@ -271,7 +373,7 @@ const KaryawanAttendanceComponent = ({titleHandler}: IProps) => {
                                                 </Typography>
                                             </CardContent>
                                             {
-                                                data.attendAvailable ? (
+                                                data.attendAvailable || (data.userStatus.wasIn && !data.userStatus.wasOut) ? (
                                                     <CardActions>
                                                         {
                                                             !data.userStatus.wasIn ? (
@@ -351,11 +453,51 @@ const KaryawanAttendanceComponent = ({titleHandler}: IProps) => {
                                 </Fragment>
                             ) : null
                         }
-                        
                     </div>
                     
                 </div>
             </div>
+
+            <Dialog
+                open={openDialogConfirm}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">{dialogMessage}</DialogTitle>
+                {
+                    attedanceLoading ? (
+                        <DialogContent>
+                            <OtherVerifyComponent />
+                        </DialogContent>
+                    ) : null
+                }
+                <DialogActions>
+                    <Button onClick={() => setOpenDialogConfirm(false)} disabled={attedanceLoading} color="primary">
+                        No
+                    </Button>
+                    <Button onClick={handleDialogClose} color="primary" disabled={attedanceLoading} autoFocus>
+                        Yes
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Snackbar
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'center',
+                }}
+                open={ openSnackbar }
+                autoHideDuration={6000}
+                onClose={ snackbarHandle }
+                message={ snackBarMessage }
+                action={
+                <Fragment>
+                    <IconButton size="small" aria-label="close" color="inherit" onClick={ snackbarHandle }>
+                        <CloseIcon fontSize="small" />
+                    </IconButton>
+                </Fragment>
+                }
+            />
         </Fragment>
     )
 }

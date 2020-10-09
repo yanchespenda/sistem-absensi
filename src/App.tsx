@@ -34,9 +34,10 @@ const AdminAttedanceComponent = React.lazy(() => import('./components/admin/atte
 
 /* Karyawan */
 const KaryawanAttendanceComponent = React.lazy(() => import('./components/karyawan/attendance'))
+const KaryawanFacesComponent = React.lazy(() => import('./components/karyawan/faces'))
 
-// axios.defaults.baseURL = 'http://127.0.0.1:3333' 
-axios.defaults.baseURL = 'https://api.absensi.project.arproject.web.id'
+axios.defaults.baseURL = 'http://127.0.0.1:3333' 
+// axios.defaults.baseURL = 'https://api.absensi.project.arproject.web.id'
 
 const drawerWidth = 240;
 
@@ -155,7 +156,7 @@ function App(_props: any) {
         getSidenav()
         getUserMenu()
       }).catch( (err) => {
-        if (err.response.status === 401) {
+        if (err.response?.status === 401) {
           deleteStorageItem('token')
           delete axios.defaults.headers.common['Authorization']
         }
@@ -317,6 +318,8 @@ function App(_props: any) {
                   {/* Staff */}
                   {/* Karyawan */}
                   <Route exact path={['/attendance']} component={(props: any) => <KaryawanAttendanceComponent {...props} titleHandler={ headerTitleHandle } />} ></Route>
+                  <Route exact path={['/faces']} component={(props: any) => <KaryawanFacesComponent {...props} titleHandler={ headerTitleHandle } />} ></Route>
+                  
                 </Switch>
               </Suspense>
               

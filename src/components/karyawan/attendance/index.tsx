@@ -148,7 +148,7 @@ const KaryawanAttendanceComponent = ({titleHandler}: IProps) => {
         if (prevStep === 1) {
             checkAttedanceIn()
             setAttedanceSteperNextDisabled(false)
-        } else  if (prevStep === 2) {
+        } else if (prevStep === 2) {
             setAttedanceSteperNextDisabled(true)
             setAttedancePhoto(null)
         }
@@ -265,6 +265,9 @@ const KaryawanAttendanceComponent = ({titleHandler}: IProps) => {
             case 0:
                 return (
                     <div className="layout-column">
+                        <Typography variant="h4">
+                            Note: Make sure your face at center of area
+                        </Typography>
                         <Typography>
                             Attedance In Status: { attedanceCheck.available ? 'Available' : 'Unavailable' }
                         </Typography>

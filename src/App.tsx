@@ -36,8 +36,8 @@ const AdminAttedanceComponent = React.lazy(() => import('./components/admin/atte
 const KaryawanAttendanceComponent = React.lazy(() => import('./components/karyawan/attendance'))
 const KaryawanFacesComponent = React.lazy(() => import('./components/karyawan/faces'))
 
-axios.defaults.baseURL = 'http://127.0.0.1:3333' 
-// axios.defaults.baseURL = 'https://api.absensi.project.arproject.web.id'
+// axios.defaults.baseURL = 'http://127.0.0.1:3333' 
+axios.defaults.baseURL = 'https://api.absensi.project.arproject.web.id'
 
 const drawerWidth = 240;
 

@@ -36,6 +36,11 @@ const AdminAttedanceComponent = React.lazy(() => import('./components/admin/atte
 const KaryawanAttendanceComponent = React.lazy(() => import('./components/karyawan/attendance'))
 const KaryawanFacesComponent = React.lazy(() => import('./components/karyawan/faces'))
 
+/* Account */
+const AccountSettingComponent = React.lazy(() => import('./components/account/setting'))
+const AccountAvatarComponent = React.lazy(() => import('./components/account/avatar'))
+
+
 // axios.defaults.baseURL = 'http://127.0.0.1:3333' 
 axios.defaults.baseURL = 'https://api.absensi.project.arproject.web.id'
 
@@ -309,8 +314,6 @@ function App(_props: any) {
                     <DashboardComponent titleHandler={ headerTitleHandle } />
                   </Route>
 
-                  <Route exact path={['/account/avatar', '/account/setting']} component={(props: any) => <DashboardComponent {...props} titleHandler={ headerTitleHandle } />} ></Route>
-
                   {/* Admin */} 
                   <Route exact path={['/admin/users']} component={(props: any) => <AdminUserComponent {...props} titleHandler={ headerTitleHandle } />} ></Route>
                   <Route exact path={['/admin/attendance']} component={(props: any) => <AdminAttedanceComponent {...props} titleHandler={ headerTitleHandle } />} ></Route>
@@ -319,6 +322,11 @@ function App(_props: any) {
                   {/* Karyawan */}
                   <Route exact path={['/attendance']} component={(props: any) => <KaryawanAttendanceComponent {...props} titleHandler={ headerTitleHandle } />} ></Route>
                   <Route exact path={['/faces']} component={(props: any) => <KaryawanFacesComponent {...props} titleHandler={ headerTitleHandle } />} ></Route>
+                  
+                  {/* Account */}
+                  <Route exact path={['/account/setting']} component={(props: any) => <AccountSettingComponent {...props} titleHandler={ headerTitleHandle } />} ></Route>
+                  <Route exact path={['/account/avatar']} component={(props: any) => <AccountAvatarComponent {...props} titleHandler={ headerTitleHandle } />} ></Route>
+                  
                   
                 </Switch>
               </Suspense>

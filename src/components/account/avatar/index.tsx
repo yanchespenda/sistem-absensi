@@ -1,6 +1,14 @@
-import React, { Fragment } from "react"
+import React, { Fragment, useEffect } from "react"
 
-const AccountAvatarComponent = () => {
+interface IProps {
+    titleHandler: (title: string) => void
+}
+
+const AccountAvatarComponent = ({titleHandler}: IProps) => {
+
+    useEffect(() => {
+        titleHandler('Setting avatar')
+    }, [titleHandler])
 
     return (
         <Fragment>

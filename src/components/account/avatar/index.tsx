@@ -95,7 +95,7 @@ const AccountAvatarComponent = ({titleHandler}: IProps) => {
             console.error(e)
             setIsAvatarLoading(false)
         }
-    }, [croppedAreaPixels, imageSrc])
+    }, [croppedAreaPixels, imageSrc, isAvatarLoading])
 
 
     const snackbarHandle = () => {

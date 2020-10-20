@@ -44,7 +44,7 @@ const AccountAvatarComponent = React.lazy(() => import('./components/account/ava
 // axios.defaults.baseURL = 'http://127.0.0.1:3333' 
 axios.defaults.baseURL = 'https://api.absensi.project.arproject.web.id'
 
-const drawerWidth = 240;
+const drawerWidth = 240
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

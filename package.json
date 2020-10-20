@@ -25,6 +25,7 @@
     "node-sass": "^4.14.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-easy-crop": "^3.2.1",
     "react-lazy-images": "^1.1.0",
     "react-redux": "^7.2.1",
     "react-router-dom": "^5.2.0",

@@ -16,6 +16,8 @@ import './index.scss'
 import './grid.scss'
 
 import { ThemeProvider, CssBaseline } from '@material-ui/core'
+import { MuiPickersUtilsProvider } from '@material-ui/pickers'
+import MomentUtils from '@date-io/moment'
 
 // const store = createStore(store, applyMiddleware(thunk))
 
@@ -42,7 +44,9 @@ ReactDOM.render(
           }
         }
       }}>
-        <App />
+        <MuiPickersUtilsProvider utils={MomentUtils}>
+          <App />
+        </MuiPickersUtilsProvider>
       </SWRConfig>
     {/* </Provider> */}
   </ThemeProvider>,

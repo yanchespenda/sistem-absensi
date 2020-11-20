@@ -5,6 +5,7 @@ import moment from "moment"
 import { Button, Card, CardActions, CardContent, Paper, Typography, makeStyles, Theme, createStyles, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core"
 import { ConvertHourMinuteSecond } from "../../../helper/dateTime"
 import useSWR from "swr"
+import axios from "axios"
 
 interface IProps {
     titleHandler: (title: string) => void
@@ -62,13 +63,14 @@ const KaryawanHistoryComponent = ({titleHandler}: IProps) => {
     const dateMin = moment().subtract(1, 'years')
     const dateMax = moment()
 
+    const [requestLoading, setRequestLoading] = useState<boolean>(false)
     const [selectedDateStart, setSelectedDateStart] = useState<MaterialUiPickersDate | null>(moment().subtract(30, 'days'))
     const [selectedDateEnd, setSelectedDateEnd] = useState<MaterialUiPickersDate | null>(dateMax)
 
     const [selectedDateStartMax, setSelectedDateStartMax] = useState<MaterialUiPickersDate | null>(selectedDateEnd)
     const [selectedDateEndMin, setSelectedDateEndMin] = useState<MaterialUiPickersDate | null>(selectedDateStart)
 
-    const { data } = useSWR<DashboardDataKaryawanAttedanceHistory[]>(`/api/karyawan/history?start=${selectedDateStart ? selectedDateStart.toISOString() : dateMin}&end=${selectedDateEnd ? selectedDateEnd.toISOString() : dateMax}`)
+    const { data } = useSWR<DashboardDataKaryawanAttedanceHistory[]>(`/api/karyawan/history?start=${selectedDateStart ? selectedDateStart.toISOString() : dateMin.toISOString()}&end=${selectedDateEnd ? selectedDateEnd.toISOString() : dateMax.toISOString()}`)
 
     const handleDateChangeStart = (date: MaterialUiPickersDate | null) => {
         if (date) {
@@ -80,6 +82,21 @@ const KaryawanHistoryComponent = ({titleHandler}: IProps) => {
         if (date) {
             setSelectedDateEnd(date)
             setSelectedDateStartMax(date)
+        }
+    }
+
+    const generateReport = () => {
+        if (!requestLoading) {
+            setRequestLoading(true)
+            const params = new URLSearchParams()
+            params.append('start', selectedDateStart ? selectedDateStart.toISOString() : dateMin.toISOString())
+            params.append('end', selectedDateEnd ? selectedDateEnd.toISOString() : dateMax.toISOString()) 
+            axios.post('/api/karyawan/history/generate', params)
+                .then(res => {window.open(res.data.url, '_self');})
+                .catch(err => {})
+                .finally(() => {
+                    setRequestLoading(false)
+                })
         }
     }
 
@@ -127,7 +144,7 @@ const KaryawanHistoryComponent = ({titleHandler}: IProps) => {
                             </div>
                         </CardContent>
                         <CardActions>
-                            <Button size="small">Generate Report</Button>
+                            <Button size="small" onClick={generateReport} disabled={requestLoading}>Generate Report</Button>
                         </CardActions>
                     </Card>
                     <Paper className={classes.paperMarginTop}>

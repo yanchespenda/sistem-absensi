@@ -182,12 +182,12 @@ function AdminUserComponent({titleHandler}: IProps) {
     }
 
     const handleChangePage = (_event: unknown, newPage: number) => {
-        console.log('handleChangePage', newPage)
+        // console.log('handleChangePage', newPage)
         setPage(newPage)
     }
     
     const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-        console.log('handleChangeRowsPerPage', event.target.value)
+        // console.log('handleChangeRowsPerPage', event.target.value)
         setRowsPerPage(parseInt(event.target.value, 10))
         setPage(0)
     }

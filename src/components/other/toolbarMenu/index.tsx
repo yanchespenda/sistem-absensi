@@ -53,7 +53,7 @@ function OtherToolbarMenuComponent({ data }: IProps) {
         if (isLogoutConfirm) {
             deleteStorageItem('token')
             delete axios.defaults.headers.common['Authorization']
-            window.location.reload()
+            window.location.href = "/"
         }
     }
 

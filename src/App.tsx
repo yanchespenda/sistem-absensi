@@ -30,7 +30,8 @@ const DashboardComponent = React.lazy(() => import('./components/dashboard'))
 const AdminUserComponent = React.lazy(() => import('./components/admin/user'))
 const AdminAttedanceComponent = React.lazy(() => import('./components/admin/attedance'))
 
-/* Staff */
+/* Staff */ 
+const StaffAttedanceComponent = React.lazy(() => import('./components/staff/attedance'))
 
 /* Karyawan */
 const KaryawanAttendanceComponent = React.lazy(() => import('./components/karyawan/attendance'))
@@ -320,6 +321,8 @@ function App(_props: any) {
                   <Route exact path={['/admin/attendance']} component={(props: any) => <AdminAttedanceComponent {...props} titleHandler={ headerTitleHandle } />} ></Route>
 
                   {/* Staff */}
+                  <Route exact path={['/staff/attendance']} component={(props: any) => <StaffAttedanceComponent {...props} titleHandler={ headerTitleHandle } />} ></Route>
+
                   {/* Karyawan */}
                   <Route exact path={['/attendance']} component={(props: any) => <KaryawanAttendanceComponent {...props} titleHandler={ headerTitleHandle } />} ></Route>
                   <Route exact path={['/faces']} component={(props: any) => <KaryawanFacesComponent {...props} titleHandler={ headerTitleHandle } />} ></Route>

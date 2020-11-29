@@ -7,6 +7,7 @@ import { ConvertHourMinuteSecond } from "../../../helper/dateTime";
 import SnackbarMessage from "../../other/parts/snackbarMessage";
 import moment from "moment"
 import axios from "axios"
+import { Link, Redirect } from "react-router-dom";
 
 interface IProps {
     titleHandler: (title: string) => void
@@ -180,11 +181,12 @@ const StaffAttedanceComponent = ({titleHandler}: IProps) => {
     }
 
     const runDialog = (id: number) => {
-        if (!requestLoading) {
-            dialogResetData()
-            setRequestLoading(true)
-            runDialogData(id)
-        }
+        // return <Redirect to={`/staff/attendance/${id}`} />
+        // if (!requestLoading) {
+        //     dialogResetData()
+        //     setRequestLoading(true)
+        //     runDialogData(id)
+        // }
     }
 
     const runDialogAction = () => {
@@ -215,12 +217,13 @@ const StaffAttedanceComponent = ({titleHandler}: IProps) => {
     }
 
     const handleDialogOpen = (item: tableData) => {
-        setDialogDataPart({
-            id: item.id,
-            username: item.username
-        })
-        runDialog(item.id)
-        setDialogOpen(!dialogOpen)
+        return <Redirect to={`/staff/attendance/${item.id}`} />
+        // setDialogDataPart({
+        //     id: item.id,
+        //     username: item.username
+        // })
+        // runDialog(item.id)
+        // setDialogOpen(!dialogOpen)
     }
 
     const handleDialogClose = () => {
@@ -262,7 +265,8 @@ const StaffAttedanceComponent = ({titleHandler}: IProps) => {
                                                     <div className="layout-column">
                                                         <span>{row.username}</span>
                                                         <div className="layout-row">
-                                                            <Typography className="selecableContent" variant="caption" component="span" onClick={() => handleDialogOpen(row)}>View attedance</Typography>
+                                                            <Link className="selecableContent" to={`/staff/attendance/${row.id}`}>View attedance</Link>
+                                                            {/* <Typography className="selecableContent" variant="caption" component="span" onClick={() => handleDialogOpen(row)}>View attedance</Typography> */}
                                                             {/* {'\u00A0|\u00A0'} */}
                                                             {/* <Typography className="selecableContent" variant="caption" component="span" onClick={() => handleDeleteDialog(row.id)}>Delete</Typography> */}
                                                         </div>

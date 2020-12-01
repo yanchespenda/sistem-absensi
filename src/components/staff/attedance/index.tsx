@@ -1,4 +1,4 @@
-import { createStyles, makeStyles, Paper, Theme, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, TablePagination, Typography, Dialog, DialogTitle, Button, DialogActions, DialogContent } from "@material-ui/core";
+import { createStyles, makeStyles, Paper, Theme, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Typography, Dialog, DialogTitle, Button, DialogActions, DialogContent } from "@material-ui/core";
 import { KeyboardDatePicker } from "@material-ui/pickers";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import React, { Fragment, useEffect, useState } from "react";
@@ -106,6 +106,11 @@ const StaffAttedanceComponent = ({titleHandler}: IProps) => {
     useEffect(() => {
         const initElement = () => {
             titleHandler('Attedance')
+
+            setDialogDataPart({
+                id: 0,
+                username: ''
+            })
         }
         initElement()
     }, [titleHandler])
@@ -124,12 +129,15 @@ const StaffAttedanceComponent = ({titleHandler}: IProps) => {
     const [selectedDateStartMax, setSelectedDateStartMax] = useState<MaterialUiPickersDate | null>(selectedDateEnd)
     const [selectedDateEndMin, setSelectedDateEndMin] = useState<MaterialUiPickersDate | null>(selectedDateStart) 
     const [dialogData, setDialogData] = useState<DashboardDataKaryawanAttedanceHistory[]>([])
+    // eslint-disable-next-line
     const [dialogDataPart, setDialogDataPart] = useState<DialogDataPart>({id: 0, username: ''})
 
     const [snackBarOpen, setSnackBarOpen] = useState(false)
+    // eslint-disable-next-line
     const [snackBarMessage, setSnackBarMessage] = useState('')
 
-    const { data, revalidate } = useSWR<tableData[]>(`api/staff/attedance?perPage=${rowsPerPage}&page=${page}`)
+    // eslint-disable-next-line
+    const { data } = useSWR<tableData[]>(`api/staff/attedance?perPage=${rowsPerPage}&page=${page}`)
 
     const handleDateChangeStart = (date: MaterialUiPickersDate | null) => {
         if (date) {
@@ -156,6 +164,7 @@ const StaffAttedanceComponent = ({titleHandler}: IProps) => {
         }
     }
 
+    // eslint-disable-next-line
     const dialogResetData = () => {
         setDialogData([])
         setSelectedDateStart(moment().subtract(30, 'days'))
@@ -174,12 +183,15 @@ const StaffAttedanceComponent = ({titleHandler}: IProps) => {
 
         axios.get<DashboardDataKaryawanAttedanceHistory[]>(`/api/staff/attedance/history?id=${id}&start=${selectedDateStart ? selectedDateStart.toISOString() : dateMin.toISOString()}&end=${selectedDateEnd ? selectedDateEnd.toISOString() : dateMax.toISOString()}`)
         .then(res => {setDialogData(res.data)})
-        .catch(err => {})
+        .catch(() => {
+            setSnackBarMessage('Something went wrong')
+        })
         .finally(() => {
             setRequestLoading(false)
         })
     }
 
+    // eslint-disable-next-line
     const runDialog = (id: number) => {
         // return <Redirect to={`/staff/attendance/${id}`} />
         // if (!requestLoading) {
@@ -198,24 +210,27 @@ const StaffAttedanceComponent = ({titleHandler}: IProps) => {
             params.append('end', selectedDateEnd ? selectedDateEnd.toISOString() : dateMax.toISOString()) 
             axios.post('/api/staff/attedance/history/generate', params)
                 .then(res => {window.open(res.data.url, '_self');})
-                .catch(err => {})
+                .catch(() => {})
                 .finally(() => {
                     setRequestLoading(false)
                 })
         }
     }
 
+    // eslint-disable-next-line
     const handleChangePage = (_event: unknown, newPage: number) => {
         // console.log('handleChangePage', newPage)
         setPage(newPage)
     }
     
+    // eslint-disable-next-line
     const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
         // console.log('handleChangeRowsPerPage', event.target.value)
         setRowsPerPage(parseInt(event.target.value, 10))
         setPage(0)
     }
 
+    // eslint-disable-next-line
     const handleDialogOpen = (item: tableData) => {
         return <Redirect to={`/staff/attendance/${item.id}`} />
         // setDialogDataPart({

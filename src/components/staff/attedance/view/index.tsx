@@ -57,18 +57,17 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 )
 
-const StaffAttedanceViewComponent = (props: IProps) => {
+const StaffAttedanceViewComponent = ({ titleHandler, match }: IProps) => {
     const classes = useStyles()
 
     useEffect(() => {
-        console.log('route', props)
         const initElement = () => {
-            props.titleHandler('Attedance')
+            titleHandler('Attedance')
         }
         initElement()
-    }, [props.titleHandler])
+    }, [titleHandler])
 
-    const userId = props?.match.params?.id
+    const userId = match.params?.id
 
     const dateMin = moment().subtract(1, 'years')
     const dateMax = moment()
@@ -80,7 +79,7 @@ const StaffAttedanceViewComponent = (props: IProps) => {
     const [selectedDateStartMax, setSelectedDateStartMax] = useState<MaterialUiPickersDate | null>(selectedDateEnd)
     const [selectedDateEndMin, setSelectedDateEndMin] = useState<MaterialUiPickersDate | null>(selectedDateStart)
 
-    const { data, revalidate, error } = useSWR<SWRData>(`api/staff/attedance/history?id=${userId}&start=${selectedDateStart ? selectedDateStart.toISOString() : dateMin.toISOString()}&end=${selectedDateEnd ? selectedDateEnd.toISOString() : dateMax.toISOString()}`)
+    const { data, error } = useSWR<SWRData>(`api/staff/attedance/history?id=${userId}&start=${selectedDateStart ? selectedDateStart.toISOString() : dateMin.toISOString()}&end=${selectedDateEnd ? selectedDateEnd.toISOString() : dateMax.toISOString()}`)
     
     if (error) {
         return <Redirect to={`/staff/attendance`} />

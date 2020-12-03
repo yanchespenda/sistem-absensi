@@ -6,6 +6,7 @@ import { Button, Card, CardActions, CardContent, Paper, Typography, makeStyles, 
 import { ConvertHourMinuteSecond } from "../../../helper/dateTime"
 import useSWR from "swr"
 import axios from "axios"
+import { Redirect } from "react-router-dom"
 
 interface IProps {
     titleHandler: (title: string) => void
@@ -52,14 +53,6 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const KaryawanHistoryComponent = ({titleHandler}: IProps) => {
     const classes = useStyles()
-
-    useEffect(() => {
-        const initElement = () => {
-            titleHandler('History')
-        }
-        initElement()
-    }, [titleHandler])
-
     const dateMin = moment().subtract(1, 'years')
     const dateMax = moment()
 
@@ -71,6 +64,22 @@ const KaryawanHistoryComponent = ({titleHandler}: IProps) => {
     const [selectedDateEndMin, setSelectedDateEndMin] = useState<MaterialUiPickersDate | null>(selectedDateStart)
 
     const { data } = useSWR<DashboardDataKaryawanAttedanceHistory[]>(`/api/karyawan/history?start=${selectedDateStart ? selectedDateStart.toISOString() : dateMin.toISOString()}&end=${selectedDateEnd ? selectedDateEnd.toISOString() : dateMax.toISOString()}`)
+
+    const [permissionFailed, setPermissionFailed] = useState(false)
+    useEffect(() => {
+        const initElement = () => {
+            titleHandler('History')
+
+            axios.get<any>(`/api/karyawan/permission`).then(() => { }).catch(() => {
+                setPermissionFailed(true)
+            }).then( () => { })
+        }
+        initElement()
+    }, [titleHandler])
+
+    if (permissionFailed) {
+        return <Redirect to="/" />
+    }
 
     const handleDateChangeStart = (date: MaterialUiPickersDate | null) => {
         if (date) {

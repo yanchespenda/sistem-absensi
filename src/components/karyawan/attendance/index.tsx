@@ -10,6 +10,7 @@ import MainStyle from './style.module.scss'
 import useSWR from "swr"
 import { TimeLocal } from "../../../helper/dateTime"
 import OtherVerifyComponent from "../../other/verify"
+import { Redirect } from "react-router-dom"
 
 interface IProps {
     titleHandler: (title: string) => void
@@ -130,6 +131,32 @@ const KaryawanAttendanceComponent = ({titleHandler}: IProps) => {
     const [openSnackbar, setOpenSnackbar] = useState(false)
     const [snackBarMessage, setSnackBarMessage] = useState('')
 
+    const { data, revalidate } = useSWR<SWRData>('/api/karyawan/status')
+
+    const capture = React.useCallback(
+        () => {
+          const imageSrc = webcamRef?.current?.getScreenshot() || null
+
+          console.log('imageSrc', imageSrc)
+          setAttedancePhoto(imageSrc)
+          setAttedanceSteperNextDisabled(false)
+        },
+        [webcamRef, setAttedancePhoto]
+    )
+
+    const [permissionFailed, setPermissionFailed] = useState(false)
+    useEffect(() => {
+        titleHandler('Attedance')
+
+        axios.get<any>(`/api/karyawan/permission`).then(() => { }).catch(() => {
+            setPermissionFailed(true)
+        }).then( () => { })
+    }, [titleHandler])
+
+    if (permissionFailed) {
+        return <Redirect to="/" />
+    }
+
     const handleNext = () => {
         const prevStep = attedanceInActiveStep
         if (prevStep === 2 ) {
@@ -218,19 +245,6 @@ const KaryawanAttendanceComponent = ({titleHandler}: IProps) => {
         height: 720,
         facingMode: "user"
     }
-
-    const capture = React.useCallback(
-        () => {
-          const imageSrc = webcamRef?.current?.getScreenshot() || null
-
-          console.log('imageSrc', imageSrc)
-          setAttedancePhoto(imageSrc)
-          setAttedanceSteperNextDisabled(false)
-        },
-        [webcamRef, setAttedancePhoto]
-    )
-
-    const { data, revalidate } = useSWR<SWRData>('/api/karyawan/status')
 
     const getSteper = () => ['Info attedance', 'Take a photo', 'Check & submit']
 
@@ -340,10 +354,6 @@ const KaryawanAttendanceComponent = ({titleHandler}: IProps) => {
     const snackbarHandle = () => {
         setOpenSnackbar(false)
     }
-
-    useEffect(() => {
-        titleHandler('Attedance')
-    }, [titleHandler])
 
     return (
         <Fragment>

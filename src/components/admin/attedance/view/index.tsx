@@ -57,7 +57,7 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 )
 
-const StaffAttedanceViewComponent = ({ titleHandler, match }: IProps) => {
+const AdminAttedanceViewComponent = ({ titleHandler, match }: IProps) => {
     const classes = useStyles()
 
     const userId = match.params?.id
@@ -72,7 +72,7 @@ const StaffAttedanceViewComponent = ({ titleHandler, match }: IProps) => {
     const [selectedDateStartMax, setSelectedDateStartMax] = useState<MaterialUiPickersDate | null>(selectedDateEnd)
     const [selectedDateEndMin, setSelectedDateEndMin] = useState<MaterialUiPickersDate | null>(selectedDateStart)
 
-    const { data, error } = useSWR<SWRData>(`api/staff/attedance/history?id=${userId}&start=${selectedDateStart ? selectedDateStart.toISOString() : dateMin.toISOString()}&end=${selectedDateEnd ? selectedDateEnd.toISOString() : dateMax.toISOString()}`)
+    const { data, error } = useSWR<SWRData>(`api/admin/attedance/history?id=${userId}&start=${selectedDateStart ? selectedDateStart.toISOString() : dateMin.toISOString()}&end=${selectedDateEnd ? selectedDateEnd.toISOString() : dateMax.toISOString()}`)
     
     const [permissionFailed, setPermissionFailed] = useState(false)
     useEffect(() => {
@@ -218,4 +218,5 @@ const StaffAttedanceViewComponent = ({ titleHandler, match }: IProps) => {
     )
 }
 
-export default StaffAttedanceViewComponent
+export default AdminAttedanceViewComponent
+

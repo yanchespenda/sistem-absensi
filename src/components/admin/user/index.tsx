@@ -10,6 +10,7 @@ import VisibilityIcon from '@material-ui/icons/Visibility'
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff'
 import SnackbarMessage from "../../other/parts/snackbarMessage"
 import { TimeLocal } from "../../../helper/dateTime"
+import { Redirect } from "react-router-dom"
 // import DeleteIcon from '@material-ui/icons/Delete'
 // import RefreshIcon from '@material-ui/icons/Refresh'
 // import EditIcon from '@material-ui/icons/Edit'
@@ -126,9 +127,18 @@ function AdminUserComponent({titleHandler}: IProps) {
 
     const { data, revalidate } = useSWR<SWRData>(`api/admin/user?perPage=${rowsPerPage}&page=${page}`)
     
+    const [permissionFailed, setPermissionFailed] = useState(false)
     useEffect(() => {
         titleHandler('User Management')
+
+        axios.get<any>(`/api/admin/permission`).then(() => { }).catch(err => {
+            setPermissionFailed(true)
+        }).then( () => { })
     }, [titleHandler])
+
+    if (permissionFailed) {
+        return <Redirect to="/" />
+    }
 
     const handleDialogClose = () => {
         if (!userDialogLoading)

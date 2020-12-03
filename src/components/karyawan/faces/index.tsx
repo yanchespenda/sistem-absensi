@@ -10,6 +10,7 @@ import MainStyle from './style.module.scss'
 import AddIcon from '@material-ui/icons/Add'
 import CloseIcon from '@material-ui/icons/Close'
 import CameraIcon from '@material-ui/icons/Camera'
+import { Redirect } from "react-router-dom"
 
 interface IProps {
     titleHandler: (title: string) => void
@@ -99,12 +100,29 @@ const KaryawanFacesComponent = ({titleHandler}: IProps) => {
     const [currentFaceStep, setCurrentFaceStep] = useState(0)
     const [currentFaceNextDisabled, setCurrentFaceNextDisabled] = useState(false)
     const [currentFaceLoading, setCurrentFaceLoading] = useState(false)
+    const { data, revalidate } = useSWR<FaceResponse[]>('/api/karyawan/face')
+    const [permissionFailed, setPermissionFailed] = useState(false)
+
+    const capture = React.useCallback(
+        () => {
+          const imageSrc = webcamRef?.current?.getScreenshot() || null
+          setCurrentFace(imageSrc)
+          setCurrentFaceNextDisabled(false)
+        },
+        [webcamRef, setCurrentFace]
+    )
 
     useEffect(() => {
         titleHandler('Setting Faces')
+
+        axios.get<any>(`/api/karyawan/permission`).then(() => { }).catch(() => {
+            setPermissionFailed(true)
+        }).then( () => { })
     }, [titleHandler])
 
-    const { data, revalidate } = useSWR<FaceResponse[]>('/api/karyawan/face')
+    if (permissionFailed) {
+        return <Redirect to="/" />
+    }
 
     const handleDialogStatus = (id: number, currentStatus: boolean) => {
         setDialogId(id)
@@ -175,15 +193,6 @@ const KaryawanFacesComponent = ({titleHandler}: IProps) => {
         height: 720,
         facingMode: "user"
     }
-
-    const capture = React.useCallback(
-        () => {
-          const imageSrc = webcamRef?.current?.getScreenshot() || null
-          setCurrentFace(imageSrc)
-          setCurrentFaceNextDisabled(false)
-        },
-        [webcamRef, setCurrentFace]
-    )
 
     const getSteper = () => ['Notice', 'Take a photo', 'Check & save']
 

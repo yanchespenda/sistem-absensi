@@ -79,7 +79,7 @@ const AdminAttedanceViewComponent = ({ titleHandler, match }: IProps) => {
         const initElement = () => {
             titleHandler('Attedance')
 
-            axios.get<any>(`/api/staff/permission`).then(() => { }).catch(() => {
+            axios.get<any>(`/api/admin/permission`).then(() => { }).catch(() => {
                 setPermissionFailed(true)
             }).then( () => { })
         }
@@ -91,7 +91,7 @@ const AdminAttedanceViewComponent = ({ titleHandler, match }: IProps) => {
     }
 
     if (error) {
-        return <Redirect to={`/staff/attendance`} />
+        return <Redirect to={`/admin/attendance`} />
     }
 
     const handleDateChangeStart = (date: MaterialUiPickersDate | null) => {
@@ -114,7 +114,7 @@ const AdminAttedanceViewComponent = ({ titleHandler, match }: IProps) => {
             params.append('id', userId.toString())
             params.append('start', selectedDateStart ? selectedDateStart.toISOString() : dateMin.toISOString())
             params.append('end', selectedDateEnd ? selectedDateEnd.toISOString() : dateMax.toISOString()) 
-            axios.post('/api/staff/attedance/history/generate', params)
+            axios.post('/api/admin/attedance/history/generate', params)
                 .then(res => {window.open(res.data.url, '_self');})
                 .catch(err => {})
                 .finally(() => {

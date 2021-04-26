@@ -7705,6 +7705,11 @@ normalize-url@^3.0.0:
   resolved "https://registry.yarnpkg.com/normalize-url/-/normalize-url-3.3.0.tgz#b2e1c4dc4f7c6d57743df733a4f5978d18650559"
   integrity sha512-U+JJi7duF1o+u2pynbp2zXDW2/PADgC30f0GsHZtRh+HOcXHnw137TrNlyxxRvWW5fjKd3bcLHPxofWuCjaeZg==
 
+normalize-wheel@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/normalize-wheel/-/normalize-wheel-1.0.1.tgz#aec886affdb045070d856447df62ecf86146ec45"
+  integrity sha1-rsiGr/2wRQcNhWRH32Ls+GFG7EU=
+
 npm-run-path@^2.0.0:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/npm-run-path/-/npm-run-path-2.0.2.tgz#35a9232dfa35d7067b4cb2ddf2357b1871536c5f"
@@ -9311,11 +9316,12 @@ react-dom@^16.13.1:
     prop-types "^15.6.2"
     scheduler "^0.19.1"
 
-react-easy-crop@^3.2.1:
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/react-easy-crop/-/react-easy-crop-3.2.1.tgz#b72f553a04815fa1bcfdd1ccf1be68dfd6699d5f"
-  integrity sha512-5igouY5tKFckQHdKl5fDq2uT3dq6cEC/V+a2OvgVs6Hh9LxeE7vQvrAoOHsHzH7CnlSnen+KW3Mb4HkQs9qr2A==
+react-easy-crop@3.3.3:
+  version "3.3.3"
+  resolved "https://registry.yarnpkg.com/react-easy-crop/-/react-easy-crop-3.3.3.tgz#665940d95c3128b0f6b52c5cd8a5d1a5cdba5382"
+  integrity sha512-CumnUN7GrGaMBK2k3nOG7By8q6IG/JfXO9ytXZHndhx6HFdlUxz1j11vm7hXBmTWDaQ9XtPSZaqSPI9ye5CiGw==
   dependencies:
+    normalize-wheel "^1.0.1"
     tslib "2.0.1"
 
 react-error-overlay@^6.0.7:
